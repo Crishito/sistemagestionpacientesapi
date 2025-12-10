@@ -1,0 +1,15 @@
+
+services:
+  mysqldb:
+    image: mysql:8.0
+    container_name: hospital-mysql-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: hospitaldb
+      MYSQL_USER: userdb
+      MYSQL_PASSWORD: password
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./db_init:/docker-entrypoint-initdb.d
