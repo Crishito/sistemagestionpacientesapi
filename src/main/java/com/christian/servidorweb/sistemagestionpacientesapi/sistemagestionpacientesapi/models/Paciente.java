@@ -5,7 +5,7 @@ import java.io.Serializable;
 
 public class Paciente implements Serializable {
 
-    // Atributos privados
+    // atributos privados
     private Integer id;
     private String cedula;
     private String nombre;
@@ -14,11 +14,11 @@ public class Paciente implements Serializable {
     private String direccion;
     private Boolean activo;
 
-    // Constructor vacío (Esencial para JAX-RS/JSON)
+    // onstructor vaco
     public Paciente() {
     }
 
-    // Constructor completo
+    // constructor complementario
     public Paciente(Integer id, String cedula, String nombre, String correo, Integer edad, String direccion, Boolean activo) {
         this.id = id;
         this.cedula = cedula;
@@ -29,7 +29,7 @@ public class Paciente implements Serializable {
         this.activo = activo;
     }
 
-    // --- Getters y Setters ---
+    // getters y setters
 
     public Integer getId() {
         return id;

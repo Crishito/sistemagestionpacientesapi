@@ -5,8 +5,8 @@ import jakarta.ws.rs.ApplicationPath;
 import jakarta.ws.rs.core.Application;
 
 
-@ApplicationPath("/api") // Define el Application Path como /api
+@ApplicationPath("/api") // define el applicacion path como /api
 public class JakartaRestConfiguration extends Application {
-    // JAX-RS escaneará automáticamente esta aplicación para encontrar y registrar
-    // todos los recursos (@Path) y proveedores (@Provider, como el CorsFilter).
+    // escaneara automaticamente esta aplicacion para encontrar y registrar
+
 }

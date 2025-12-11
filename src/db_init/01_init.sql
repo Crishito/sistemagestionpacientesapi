@@ -10,8 +10,9 @@ CREATE TABLE paciente (
     fecha_registro TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Datos de prueba opcionales
+-- Datos de prueba
 INSERT INTO paciente (nombre, correo, edad, direccion, cedula) VALUES
-('Juan Pérez', 'juan.perez@test.com', 35, 'Av. Siempre Viva 123', '1712345678'); 
+('Cristian Zumárraga', 'crishito@test.com', 27, 'La Roca', '1712345678');
 
--- Nota: Reemplaza con una cédula ecuatoriana válida
+select * from paciente;
+

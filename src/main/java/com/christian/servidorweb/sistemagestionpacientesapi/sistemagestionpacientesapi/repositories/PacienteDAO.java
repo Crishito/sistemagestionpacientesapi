@@ -59,6 +59,44 @@ public class PacienteDAO implements PacienteRepository {
     }
 
     @Override
+    public Optional<Paciente> porCedula(String cedula) {
+        Paciente paciente = null;
+
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement("SELECT * FROM paciente WHERE cedula = ?")) {
+            stmt.setString(1, cedula);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    paciente = crearPaciente(rs);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return Optional.ofNullable(paciente);
+    }
+
+    @Override
+    public Optional<Paciente> porCorreo(String correo) {
+        Paciente paciente = null;
+
+        try (Connection conn = getConnection();
+             PreparedStatement stmt = conn.prepareStatement("SELECT * FROM paciente WHERE correo = ?")) {
+            stmt.setString(1, correo);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    paciente = crearPaciente(rs);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return Optional.ofNullable(paciente);
+    }
+
+    @Override
     public Paciente guardar(Paciente paciente) {
         String sql;
 
@@ -83,7 +121,7 @@ public class PacienteDAO implements PacienteRepository {
                 stmt.setString(2, paciente.getCorreo());
                 stmt.setInt(3, paciente.getEdad());
                 stmt.setString(4, paciente.getDireccion());
-                stmt.setInt(5, paciente.getId());           // WHERE id=?
+                stmt.setInt(5, paciente.getId());
 
             } else {
                 // Parámetros para INSERT
@@ -108,9 +146,9 @@ public class PacienteDAO implements PacienteRepository {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            // Devolver null o lanzar una RuntimeException en caso de error de DB
+            // Lanza una excepción para que el PacienteService pueda atraparla, si la DB falla.
+            throw new RuntimeException("Error en la base de datos al guardar/actualizar el paciente. Revise su conexión y los campos NOT NULL.", e);
         }
-        // Devolvemos el objeto Paciente con el ID asignado
         return paciente;
     }
 
@@ -124,6 +162,8 @@ public class PacienteDAO implements PacienteRepository {
             stmt.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
+            // Si la eliminación falla, también lanzamos una excepción crítica
+            throw new RuntimeException("Error en la base de datos al intentar eliminar el paciente.", e);
         }
     }
 
@@ -136,7 +176,6 @@ public class PacienteDAO implements PacienteRepository {
             stmt.setBoolean(1, activo);
             stmt.setInt(2, id);
 
-            // Devolvemos true si se actualizó al menos una fila
             return stmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();

@@ -9,12 +9,12 @@ import java.sql.SQLException;
 public class Conexion {
 
     // URL usando el nombre del servicio de Docker Compose: mysqldb
-    private static final String URL = "jdbc:mysql://mysqldb:3306/hospitaldb?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true";
+    private static final String URL = "jdbc:mysql://localhost:3306/hospitaldb?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true";
 
     // Credenciales del contenedor Docker Compose
-    private static final String USER = "userdb";
-    private static final String PASS = "password";
-    // NOTA: Si usas root para conectar, cambia USER a "root" y PASS a "root"
+    private static final String USER = "root";
+    private static final String PASS = "root";
+
 
     public static Connection getConnection() throws SQLException {
         try {

@@ -2,6 +2,8 @@ package com.christian.servidorweb.sistemagestionpacientesapi.sistemagestionpacie
 
 import com.christian.servidorweb.sistemagestionpacientesapi.sistemagestionpacientesapi.models.Paciente;
 import com.christian.servidorweb.sistemagestionpacientesapi.sistemagestionpacientesapi.services.PacienteService;
+import com.christian.servidorweb.sistemagestionpacientesapi.sistemagestionpacientesapi.services.exceptions.CedulaYaExisteException;
+import com.christian.servidorweb.sistemagestionpacientesapi.sistemagestionpacientesapi.services.exceptions.CorreoYaExisteException;
 import com.christian.servidorweb.sistemagestionpacientesapi.sistemagestionpacientesapi.util.ValidadorCedulaEc;
 
 import jakarta.inject.Inject;
@@ -20,7 +22,7 @@ public class PacienteResource {
     @Inject
     private PacienteService service;
 
-    private static final Pattern NAME_PATTERN = Pattern.compile("^[a-zA-Z\\s]+$");
+    private static final Pattern NAME_PATTERN = Pattern.compile("^[a-zA-ZAáéíóú\\s]+$");
     private static final Pattern EMAIL_PATTERN = Pattern.compile("^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$");
 
     private Response validatePaciente(Paciente paciente, boolean isCreation) {
@@ -85,9 +87,24 @@ public class PacienteResource {
 
         try {
             Paciente nuevoPaciente = service.guardar(paciente);
-            return Response.status(Response.Status.CREATED).entity(nuevoPaciente).build();
+
+
+            Object respuesta = new Object() {
+                public final String mensaje = "Paciente registrado correctamente.";
+                public final Paciente paciente = nuevoPaciente;
+            };
+
+            return Response.status(Response.Status.CREATED).entity(respuesta).build();
+
+        } catch (CedulaYaExisteException e) {
+            return Response.status(Response.Status.CONFLICT)
+                    .entity("{\"error\":\"La cédula '" + paciente.getCedula() + "' ya está registrada.\"}").build();
+        } catch (CorreoYaExisteException e) {
+            return Response.status(Response.Status.CONFLICT)
+                    .entity("{\"error\":\"El correo electrónico '" + paciente.getCorreo() + "' ya está registrado.\"}").build();
         } catch (Exception e) {
-            return Response.status(Response.Status.CONFLICT).entity("{\"error\":\"La cédula o correo ya está registrada o hubo un error en la base de datos.\"}").build();
+            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                    .entity("{\"error\":\"Error interno al intentar registrar el paciente. Causa: " + e.getMessage() + "\"}").build();
         }
     }
 
@@ -104,10 +121,35 @@ public class PacienteResource {
             paciente.setId(id);
             paciente.setCedula(pacienteExistente.get().getCedula());
 
-            Paciente pacienteActualizado = service.guardar(paciente);
-            return Response.ok(pacienteActualizado).build();
+            try {
+                Paciente pacienteActualizado = service.guardar(paciente);
+                return Response.ok(pacienteActualizado).build();
+            } catch (CedulaYaExisteException e) {
+                return Response.status(Response.Status.CONFLICT)
+                        .entity("{\"error\":\"La cédula '" + paciente.getCedula() + "' ya está registrada.\"}").build();
+            } catch (CorreoYaExisteException e) {
+                return Response.status(Response.Status.CONFLICT)
+                        .entity("{\"error\":\"El correo electrónico '" + paciente.getCorreo() + "' ya está registrado por otro paciente.\"}").build();
+            } catch (Exception e) {
+                return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
+                        .entity("{\"error\":\"Error al intentar actualizar el paciente. Causa: " + e.getMessage() + "\"}").build();
+            }
+
         }
         return Response.status(Response.Status.NOT_FOUND).entity("{\"error\":\"Paciente no encontrado para actualizar.\"}").build();
+    }
+
+    @DELETE
+    @Path("/{id}")
+    public Response eliminar(@PathParam("id") Integer id) {
+        Optional<Paciente> pacienteExistente = service.porId(id);
+
+        if (pacienteExistente.isPresent()) {
+            service.eliminar(id);
+            return Response.status(Response.Status.NO_CONTENT).build();
+        }
+
+        return Response.status(Response.Status.NOT_FOUND).entity("{\"error\":\"Paciente no encontrado para eliminar.\"}").build();
     }
 
     @PUT
